@@ -428,6 +428,152 @@
     color: #fff;
   }
 
+  /* ─── GOLD GLOW & TEXT ─── */
+  .glow-gold {
+    box-shadow: 0 0 40px -5px rgba(212, 175, 55, 0.35), 0 0 80px -10px rgba(212, 175, 55, 0.12);
+  }
+
+  .text-gold {
+    background: linear-gradient(135deg, #d4af37, #f0d060, #b8960c);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: none;
+    filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.4));
+  }
+
+  .border-gold-left {
+    border-left: 3px solid rgba(212, 175, 55, 0.5);
+  }
+
+  /* ─── GREEN NEON GLOW ─── */
+  .glow-green {
+    box-shadow:
+      0 0 20px -3px rgba(37, 211, 102, 0.35),
+      0 0 50px -8px rgba(37, 211, 102, 0.25),
+      0 0 80px -15px rgba(37, 211, 102, 0.1);
+  }
+
+  @keyframes pulse-green {
+    0%, 100% {
+      box-shadow:
+        0 0 20px -3px rgba(37, 211, 102, 0.35),
+        0 0 50px -8px rgba(37, 211, 102, 0.25);
+    }
+    50% {
+      box-shadow:
+        0 0 35px -2px rgba(37, 211, 102, 0.55),
+        0 0 70px -5px rgba(37, 211, 102, 0.35),
+        0 0 100px -10px rgba(37, 211, 102, 0.15);
+    }
+  }
+
+  .pulse-green {
+    animation: pulse-green 2.5s ease-in-out infinite;
+  }
+
+  /* ─── GREEN SHIMMER VARIANT ─── */
+  .btn-cta.shimmer-green::after {
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(37, 211, 102, 0.15) 50%,
+      transparent 100%
+    );
+  }
+
+  /* ─── GOLD SHIMMER VARIANT ─── */
+  .btn-cta.shimmer-gold::after {
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(212, 175, 55, 0.15) 50%,
+      transparent 100%
+    );
+  }
+
+  /* ─── GOLD OPTION CARD (step 3 orçamento) ─── */
+  .option-card.gold-accent {
+    border-color: rgba(212, 175, 55, 0.18);
+    border-left-color: rgba(212, 175, 55, 0.35);
+  }
+
+  .option-card.gold-accent:hover {
+    border-color: rgba(212, 175, 55, 0.5);
+    border-left-color: #d4af37;
+    box-shadow: 0 4px 28px -4px rgba(212, 175, 55, 0.2), inset 0 0 20px -10px rgba(212, 175, 55, 0.08);
+    background: rgba(212, 175, 55, 0.06);
+  }
+
+  .option-card-active.gold-accent {
+    background: rgba(212, 175, 55, 0.12);
+    border-color: #d4af37;
+    border-left-color: #d4af37;
+    box-shadow: 0 0 32px -6px rgba(212, 175, 55, 0.3), inset 0 0 24px -8px rgba(212, 175, 55, 0.1);
+  }
+
+  /* ─── GOLD STEP DOT ─── */
+  .step-dot-active.gold {
+    background: rgba(212, 175, 55, 0.2);
+    border-color: #d4af37;
+    box-shadow: 0 0 16px -2px rgba(212, 175, 55, 0.4);
+  }
+
+  .step-dot-done.gold {
+    background: #d4af37;
+    border-color: #d4af37;
+  }
+
+  .step-dot-connector.done.gold {
+    background: #d4af37;
+  }
+
+  .step-dot-label.done.gold {
+    color: #d4af37;
+  }
+
+  /* ─── GREEN STEP DOT ─── */
+  .step-dot-active.green {
+    background: rgba(37, 211, 102, 0.2);
+    border-color: #25d366;
+    box-shadow: 0 0 16px -2px rgba(37, 211, 102, 0.4);
+  }
+
+  /* ─── GREEN PROGRESS BAR (step 4) ─── */
+  .progress-bar-fill.final-step {
+    background: linear-gradient(90deg, #25d366, #1ed760);
+    box-shadow: 0 0 12px rgba(37, 211, 102, 0.5);
+  }
+
+  /* ─── GOLD CONFETTI ─── */
+  @keyframes confetti-fall-gold-1 {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(80px) rotate(180deg); opacity: 0; }
+  }
+  @keyframes confetti-fall-gold-2 {
+    0% { transform: translateY(-20px) rotate(45deg) translateX(0); opacity: 1; }
+    100% { transform: translateY(70px) rotate(225deg) translateX(20px); opacity: 0; }
+  }
+
+  .confetti-gold-1 { background: #d4af37; top: 12%; left: 15%; animation-name: confetti-fall-gold-1; --delay: 0.12s; }
+  .confetti-gold-2 { background: #f0d060; top: 7%; left: 60%; animation-name: confetti-fall-gold-2; --delay: 0.18s; width: 6px; height: 6px; }
+  .confetti-gold-3 { background: #b8960c; top: 10%; left: 35%; animation-name: confetti-fall-gold-1; --delay: 0.03s; }
+  .confetti-gold-4 { background: #d4af37; top: 4%; left: 75%; animation-name: confetti-fall-gold-2; --delay: 0.22s; width: 6px; height: 6px; }
+
+  /* ─── GREEN CONFETTI ─── */
+  @keyframes confetti-fall-green-1 {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(80px) rotate(180deg); opacity: 0; }
+  }
+  @keyframes confetti-fall-green-2 {
+    0% { transform: translateY(-15px) rotate(-30deg) translateX(0); opacity: 1; }
+    100% { transform: translateY(90px) rotate(150deg) translateX(-20px); opacity: 0; }
+  }
+
+  .confetti-green-1 { background: #25d366; top: 10%; left: 40%; animation-name: confetti-fall-green-1; --delay: 0.06s; }
+  .confetti-green-2 { background: #1ed760; top: 6%; left: 65%; animation-name: confetti-fall-green-2; --delay: 0.14s; width: 5px; height: 5px; }
+  .confetti-green-3 { background: #25d366; top: 14%; left: 25%; animation-name: confetti-fall-green-1; --delay: 0.2s; border-radius: 50%; }
+
   @media (prefers-reduced-motion: reduce) {
     .btn-cta::after { animation: none; }
     .option-card:hover { transform: none; }

@@ -197,9 +197,11 @@ function App() {
         {stepDotStates.map((dot, i) => {
           const isComplete = !!formData[dot.field];
           const isCurrent = currentIndex === dot.idx;
+          const isGold = dot.idx === 3;
+          const isGreen = dot.idx === 4;
           let className = 'step-dot';
-          if (isComplete && !isCurrent) className = 'step-dot step-dot-done';
-          else if (isCurrent) className = 'step-dot step-dot-active';
+          if (isComplete && !isCurrent) className = `step-dot step-dot-done ${isGold ? 'gold' : isGreen ? 'green' : ''}`;
+          else if (isCurrent) className = `step-dot step-dot-active ${isGold ? 'gold' : isGreen ? 'green' : ''}`;
 
           const handleDotClick = () => {
             if (isComplete && !isCurrent) {
@@ -229,14 +231,14 @@ function App() {
                   )}
                 </button>
                 <span
-                  className={`step-dot-label ${isCurrent ? 'active' : ''} ${isComplete && !isCurrent ? 'done' : ''}`}
+                  className={`step-dot-label ${isCurrent ? 'active' : ''} ${isComplete && !isCurrent ? `done ${isGold ? 'gold' : isGreen ? 'green' : ''}` : ''}`}
                 >
                   {STEP_DOT_LABELS[i]}
                 </span>
               </div>
               {i < stepDotStates.length - 1 && (
                 <div
-                  className={`step-dot-connector ${isComplete ? 'done' : ''}`}
+                  className={`step-dot-connector ${isComplete ? `done ${isGold ? 'gold' : ''}` : ''}`}
                 />
               )}
             </div>
@@ -253,9 +255,9 @@ function App() {
         <span className="text-primary">DESENVOLVER</span>
       </h1>
 
-      <div className="w-full glass-card rounded-2xl p-6 md:p-8 text-left text-foreground/90 space-y-4">
+      <div className="w-full glass-card rounded-2xl p-6 md:p-8 text-left text-foreground/90 space-y-4 border-gold-left glow-gold">
         <p className="font-medium text-lg border-b border-border/50 pb-4">
-          Por um investimento de R$ 1.800, o pacote de Protótipo da{' '}
+          Por um investimento de <span className="text-gold font-semibold text-xl">R$ 1.800</span>, o pacote de Protótipo da{' '}
           <span className="text-primary font-semibold">Canis</span> entrega:
         </p>
         <ul className="space-y-3 pt-2">
@@ -279,7 +281,7 @@ function App() {
 
       <button
         onClick={() => goToStep('step1')}
-        className="btn-cta w-full md:w-auto glow-primary relative inline-flex items-center justify-center px-10 py-5 font-bold text-white transition-all duration-300 ease-in-out bg-primary rounded-xl hover:brightness-110 hover:scale-[1.03] active:scale-95 focus:outline-none group"
+        className="btn-cta w-full md:w-auto glow-primary shimmer-gold relative inline-flex items-center justify-center px-10 py-5 font-bold text-white transition-all duration-300 ease-in-out bg-primary rounded-xl hover:brightness-110 hover:scale-[1.03] active:scale-95 focus:outline-none group"
       >
         <span className="text-lg">Começar Agora</span>
         <ArrowRight className="w-6 h-6 ml-3 transition-transform duration-300 group-hover:translate-x-1" />
@@ -349,7 +351,7 @@ function App() {
           <button
             key={option.id}
             {...optionButtonProps('budget', option.id, 'step4')}
-            className={`w-full flex items-center justify-between p-5 rounded-2xl text-left cursor-pointer ${
+            className={`w-full flex items-center justify-between p-5 rounded-2xl text-left cursor-pointer gold-accent ${
               formData.budget === option.id ? 'option-card-active' : 'option-card'
             }`}
           >
@@ -441,7 +443,7 @@ function App() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="btn-cta w-full flex items-center justify-center px-8 py-5 mt-4 font-bold text-lg text-white transition-all duration-300 ease-in-out bg-primary rounded-xl hover:brightness-110 hover:scale-[1.02] active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed glow-primary"
+          className="btn-cta w-full flex items-center justify-center px-8 py-5 mt-4 font-bold text-lg text-white transition-all duration-300 ease-in-out bg-primary rounded-xl hover:brightness-110 hover:scale-[1.02] active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed glow-green shimmer-green"
         >
           {isSubmitting ? (
             <Loader2 className="w-6 h-6 animate-spin" />
@@ -465,9 +467,16 @@ function App() {
       <div className="confetti-piece confetti-3" />
       <div className="confetti-piece confetti-4" />
       <div className="confetti-piece confetti-5" />
+      <div className="confetti-piece confetti-gold-1" />
+      <div className="confetti-piece confetti-gold-2" />
+      <div className="confetti-piece confetti-gold-3" />
+      <div className="confetti-piece confetti-gold-4" />
+      <div className="confetti-piece confetti-green-1" />
+      <div className="confetti-piece confetti-green-2" />
+      <div className="confetti-piece confetti-green-3" />
 
-      <div className="success-icon-animate w-24 h-24 bg-primary/20 rounded-full flex items-center justify-center mb-4 border border-primary/30 glow-primary">
-        <CheckCircle2 className="w-12 h-12 text-primary" />
+      <div className="success-icon-animate w-24 h-24 bg-[#25D366]/20 rounded-full flex items-center justify-center mb-4 border border-[#25D366]/30 glow-green">
+        <CheckCircle2 className="w-12 h-12 text-[#25D366]" />
       </div>
       <h2 className="text-3xl md:text-4xl font-bold text-foreground">Recebemos seus dados!</h2>
       <p className="text-xl text-muted-foreground max-w-md">
@@ -477,7 +486,7 @@ function App() {
         href={generateWhatsAppLink(isQualified)}
         target="_blank"
         rel="noopener noreferrer"
-        className="btn-cta inline-flex items-center justify-center px-10 py-5 font-bold text-lg text-white transition-all duration-300 bg-[#25D366] rounded-xl hover:bg-[#128C7E] hover:scale-105 shadow-[0_0_30px_rgba(37,211,102,0.3)] mt-4"
+        className="btn-cta pulse-green inline-flex items-center justify-center px-10 py-5 font-bold text-lg text-white transition-all duration-300 bg-[#25D366] rounded-xl hover:bg-[#128C7E] hover:scale-105 shadow-[0_0_30px_rgba(37,211,102,0.3)] mt-4"
       >
         Falar no WhatsApp
       </a>
@@ -503,7 +512,10 @@ function App() {
         {isFormStep && (
           <div className="flex flex-col items-center gap-3 w-full max-w-xs px-4">
             <div className="progress-bar-track w-full h-1.5">
-              <div className="progress-bar-fill" style={{ width: `${progressPercentage}%` }} />
+              <div
+                className={`progress-bar-fill ${currentStep === 'step4' ? 'final-step' : ''}`}
+                style={{ width: `${progressPercentage}%` }}
+              />
             </div>
             <span className="text-xs font-medium text-muted-foreground tracking-wide">
               Passo {currentIndex} de 4
