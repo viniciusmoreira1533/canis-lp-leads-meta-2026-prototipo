@@ -98,12 +98,6 @@ function App() {
 
   const renderIntro = () => (
     <div className="flex flex-col items-center justify-center text-center space-y-8 animate-in fade-in zoom-in duration-500 w-full max-w-2xl mx-auto mt-10">
-      <div className="w-full flex justify-center mb-6">
-        <span className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 text-sm font-semibold tracking-wide uppercase shadow-sm">
-          Call to Action
-        </span>
-      </div>
-      
       <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground leading-tight px-4">
         Veja seu projeto <span className="text-primary">PRONTO</span> antes de começar a <span className="text-primary">DESENVOLVER</span>
       </h1>
@@ -328,28 +322,13 @@ function App() {
       <div className="fixed top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-primary/10 blur-[150px] pointer-events-none" />
       <div className="fixed bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-[#2e7d89]/10 blur-[150px] pointer-events-none" />
 
-      {/* Header com Barra de Progresso */}
-      <header className="fixed top-0 left-0 right-0 z-50">
-        <div className="h-1.5 bg-card/80 backdrop-blur-md">
-          <div 
-            className="h-full bg-primary transition-all duration-500 ease-out glow-primary"
-            style={{ width: `${progressPercentage}%` }}
-          />
-        </div>
-        <div className="max-w-3xl mx-auto px-6 py-4 flex justify-between items-center bg-background/60 backdrop-blur-xl border-b border-border/50 rounded-b-2xl">
-          <div className="flex items-center gap-2">
-            <img src="/canis_logo.webp" alt="Canis Logo" className="h-8 object-contain drop-shadow-[0_0_15px_rgba(46,125,137,0.3)]" />
-          </div>
-          {currentStep !== 'intro' && currentStep !== 'success' && currentStep !== 'unqualified' && (
-            <span className="text-sm font-medium text-muted-foreground bg-card/50 px-3 py-1 rounded-full border border-border/50">
-              {currentIndex} de 4
-            </span>
-          )}
-        </div>
-      </header>
+      {/* Logo Centralizado no Topo */}
+      <div className="w-full flex justify-center pt-10 pb-2 relative z-10">
+        <img src="/canis_logo.webp" alt="Canis Logo" className="h-10 object-contain drop-shadow-[0_0_15px_rgba(46,125,137,0.3)]" />
+      </div>
 
       {/* Área Principal */}
-      <main className="flex-1 flex flex-col items-center justify-start px-4 md:px-6 pt-24 pb-20 w-full relative z-10">
+      <main className="flex-1 flex flex-col items-center justify-start px-4 md:px-6 pt-4 pb-20 w-full relative z-10">
         <div className="w-full max-w-2xl">
           {currentStep === 'intro' && renderIntro()}
           {currentStep === 'step1' && renderStep1()}
