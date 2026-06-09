@@ -22,16 +22,18 @@ interface FormData {
 }
 
 const WHATSAPP_MESSAGE_QUALIFIED = (
+  nome: string,
   produto: string,
   estado: string,
 ) =>
-  `Oi, vi o anuncio na meta sobre os prototipos, preciso de um prototipo de ${produto}, atualmente meu projeto esta ${estado}. Gostaria de conversar.`;
+  `Oi, meu nome é ${nome}. Vi o anuncio na meta sobre os prototipos, preciso de um prototipo de ${produto}, atualmente meu projeto esta ${estado}. Gostaria de conversar.`;
 
 const WHATSAPP_MESSAGE_UNQUALIFIED = (
+  nome: string,
   produto: string,
   estado: string,
 ) =>
-  `Oi, vi o anuncio sobre os prototipos. Meu projeto e um ${produto} e esta ${estado}. Meu orcamento e menor no momento, mas gostaria de conversar sobre alternativas.`;
+  `Oi, meu nome é ${nome}. Vi o anuncio sobre os prototipos. Meu projeto e um ${produto} e esta ${estado}. Meu orcamento e menor no momento, mas gostaria de conversar sobre alternativas.`;
 
 const formatWhatsApp = (value: string): string => {
   const digits = value.replace(/\D/g, '').slice(0, 11);
@@ -103,8 +105,8 @@ function App() {
     const produto = PROJECT_TYPE_LABELS[formData.projectType] || 'tecnologia';
     const estado = PROJECT_STATUS_LABELS[formData.projectStatus] || 'em planejamento';
     const text = isQualified
-      ? WHATSAPP_MESSAGE_QUALIFIED(produto, estado)
-      : WHATSAPP_MESSAGE_UNQUALIFIED(produto, estado);
+      ? WHATSAPP_MESSAGE_QUALIFIED(formData.name, produto, estado)
+      : WHATSAPP_MESSAGE_UNQUALIFIED(formData.name, produto, estado);
     return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
   };
 
