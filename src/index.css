@@ -33,32 +33,208 @@
 }
 
 @layer utilities {
+
+  /* ─── GLASS CARDS ─── */
   .glass-card {
     background: hsla(222, 47%, 10%, 0.7);
     backdrop-filter: blur(20px);
     border: 1px solid hsla(188, 50%, 36%, 0.18);
-    transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.4s ease;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
   }
-  
+
   .glass-card:hover {
-    border-color: hsla(188, 50%, 36%, 0.35);
-    box-shadow: 0 0 30px -8px hsla(188, 50%, 36%, 0.15), 0 0 30px -8px hsla(188, 50%, 36%, 0.2);
+    border-color: hsla(188, 50%, 36%, 0.4);
+    box-shadow: 0 0 30px -8px hsla(188, 50%, 36%, 0.2), 0 0 60px -20px hsla(188, 50%, 36%, 0.15);
   }
-  
+
   .glass-card-active {
     background: hsla(188, 50%, 36%, 0.15);
     border-color: hsla(188, 50%, 36%, 0.6);
     box-shadow: 0 0 30px -8px hsla(188, 50%, 36%, 0.3);
   }
 
+  /* ─── GLOW ─── */
   .glow-primary {
     box-shadow: 0 0 40px -5px hsla(188, 50%, 36%, 0.5), 0 0 80px -10px hsla(188, 50%, 36%, 0.2);
   }
 
+  /* ─── TECH GRID ─── */
   .tech-grid {
     background-image:
-      linear-gradient(hsla(188, 50%, 36%, 0.03) 1px, transparent 1px),
-      linear-gradient(90deg, hsla(188, 50%, 36%, 0.03) 1px, transparent 1px);
+      linear-gradient(hsla(188, 50%, 36%, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, hsla(188, 50%, 36%, 0.05) 1px, transparent 1px);
     background-size: 60px 60px;
+  }
+
+  /* ─── SHIMMER BUTTON (CTA) ─── */
+  @keyframes shimmer-slide {
+    0% { transform: translateX(-100%) skewX(-20deg); }
+    100% { transform: translateX(300%) skewX(-20deg); }
+  }
+
+  .btn-cta {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-cta::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 40%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      hsla(0, 0%, 100%, 0.12) 50%,
+      transparent 100%
+    );
+    animation: shimmer-slide 2.8s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  /* ─── OPTION CARDS (choices nos steps) ─── */
+  .option-card {
+    background: hsla(222, 47%, 9%, 0.8);
+    backdrop-filter: blur(16px);
+    border: 1px solid hsla(188, 50%, 36%, 0.16);
+    border-left: 3px solid transparent;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease, border-left-color 0.25s ease, background 0.25s ease;
+  }
+
+  .option-card:hover {
+    border-color: hsla(188, 50%, 36%, 0.4);
+    border-left-color: #2e7d89;
+    background: hsla(188, 50%, 36%, 0.08);
+    box-shadow: 0 4px 24px -4px hsla(188, 50%, 36%, 0.18);
+    transform: translateX(4px);
+  }
+
+  .option-card-active {
+    background: hsla(188, 50%, 36%, 0.15);
+    border-color: hsla(188, 50%, 36%, 0.55);
+    border-left-color: #2e7d89;
+    box-shadow: 0 0 28px -8px hsla(188, 50%, 36%, 0.3);
+    transform: translateX(4px);
+  }
+
+  /* ─── INPUTS ESTILIZADOS ─── */
+  .input-styled {
+    background: hsla(222, 47%, 7%, 0.9);
+    border: 1px solid hsla(188, 50%, 36%, 0.2);
+    color: hsl(var(--foreground));
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .input-styled::placeholder {
+    color: hsla(215, 20%, 55%, 0.6);
+  }
+
+  .input-styled:focus {
+    outline: none;
+    border-color: #2e7d89;
+    box-shadow: 0 0 0 3px hsla(188, 50%, 36%, 0.15), 0 0 20px -4px hsla(188, 50%, 36%, 0.2);
+  }
+
+  /* ─── LOGO DIVIDER ─── */
+  .logo-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    max-width: 280px;
+  }
+
+  .logo-divider::before,
+  .logo-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, hsla(188, 50%, 36%, 0.3));
+  }
+
+  .logo-divider::after {
+    background: linear-gradient(90deg, hsla(188, 50%, 36%, 0.3), transparent);
+  }
+
+  /* ─── PROGRESS BAR ─── */
+  .progress-bar-track {
+    background: hsla(217, 33%, 15%, 0.8);
+    border-radius: 9999px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #2e7d89, hsl(188, 60%, 50%));
+    border-radius: 9999px;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 10px hsla(188, 50%, 36%, 0.5);
+  }
+
+  /* ─── SUCCESS ANIMATION ─── */
+  @keyframes success-pop {
+    0% { transform: scale(0); opacity: 0; }
+    60% { transform: scale(1.15); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .success-icon-animate {
+    animation: success-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  /* ─── CONFETTI (CSS puro) ─── */
+  @keyframes confetti-fall-1 {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(80px) rotate(180deg); opacity: 0; }
+  }
+  @keyframes confetti-fall-2 {
+    0% { transform: translateY(-20px) rotate(45deg) translateX(0); opacity: 1; }
+    100% { transform: translateY(70px) rotate(225deg) translateX(20px); opacity: 0; }
+  }
+  @keyframes confetti-fall-3 {
+    0% { transform: translateY(-10px) rotate(-30deg) translateX(0); opacity: 1; }
+    100% { transform: translateY(90px) rotate(150deg) translateX(-20px); opacity: 0; }
+  }
+
+  .confetti-piece {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    opacity: 0;
+    animation-duration: 1.2s;
+    animation-timing-function: ease-out;
+    animation-fill-mode: forwards;
+    animation-delay: var(--delay, 0s);
+  }
+
+  .confetti-1 { background: #2e7d89; top: 10%; left: 20%; animation-name: confetti-fall-1; }
+  .confetti-2 { background: hsl(188, 60%, 65%); top: 5%; left: 70%; animation-name: confetti-fall-2; --delay: 0.1s; }
+  .confetti-3 { background: #fff; top: 15%; left: 45%; animation-name: confetti-fall-3; --delay: 0.05s; border-radius: 50%; width: 6px; height: 6px; }
+  .confetti-4 { background: #2e7d89; top: 8%; left: 55%; animation-name: confetti-fall-1; --delay: 0.15s; }
+  .confetti-5 { background: hsl(188, 60%, 75%); top: 3%; left: 30%; animation-name: confetti-fall-2; --delay: 0.08s; width: 6px; height: 6px; }
+
+  /* ─── MOBILE PERFORMANCE ─── */
+  @media (max-width: 768px) {
+    .btn-cta::after {
+      animation-duration: 3.5s;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn-cta::after {
+      animation: none;
+    }
+    .option-card:hover {
+      transform: none;
+    }
+    .success-icon-animate {
+      animation: none;
+    }
+    .confetti-piece {
+      display: none;
+    }
   }
 }
