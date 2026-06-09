@@ -326,9 +326,12 @@ function App() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col font-sans selection:bg-primary/30 tech-grid relative overflow-x-hidden">
-      {/* Decorative gradients */}
-      <div className="fixed top-[-20%] left-[-10%] w-[65%] h-[65%] rounded-full bg-primary/15 blur-[180px] pointer-events-none" />
-      <div className="fixed bottom-[-20%] right-[-10%] w-[55%] h-[55%] rounded-full bg-[#2e7d89]/12 blur-[160px] pointer-events-none" />
+      {/* Decorative gradients — GPU-animated blobs */}
+      <div className="blob-1 fixed top-[-20%] left-[-10%] w-[65%] h-[65%] rounded-full bg-primary/15 blur-[180px] pointer-events-none" />
+      <div className="blob-2 fixed bottom-[-20%] right-[-10%] w-[55%] h-[55%] rounded-full bg-[#2e7d89]/12 blur-[160px] pointer-events-none" />
+
+      {/* Scanline sweep effect */}
+      <div className="bg-scanline" />
 
       {/* Logo Centralizado no Topo */}
       <div className="w-full flex flex-col items-center pt-10 pb-4 relative z-10 space-y-4">
