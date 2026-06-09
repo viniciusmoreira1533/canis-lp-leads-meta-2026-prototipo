@@ -3,14 +3,60 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --background: 222 47% 3%;
+    --foreground: 210 40% 96%;
+
+    --card: 222 47% 6%;
+    --card-foreground: 210 40% 96%;
+
+    --primary: 130 55% 40%;
+    --primary-foreground: 210 40% 98%;
+
+    --muted: 217 33% 12%;
+    --muted-foreground: 215 20% 55%;
+
+    --border: 217 33% 15%;
+    --input: 217 33% 15%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
   body {
-    @apply bg-background text-textMain antialiased;
+    @apply bg-background text-foreground antialiased;
     font-family: 'Inter', system-ui, sans-serif;
   }
 }
 
 @layer utilities {
-  .glass-panel {
-    @apply bg-surface/50 backdrop-blur-md border border-border/50 shadow-xl;
+  .glass-card {
+    background: hsla(222, 47%, 10%, 0.7);
+    backdrop-filter: blur(20px);
+    border: 1px solid hsla(130, 55%, 40%, 0.18);
+    transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.4s ease;
+  }
+  
+  .glass-card:hover {
+    border-color: hsla(130, 55%, 40%, 0.35);
+    box-shadow: 0 0 30px -8px hsla(250, 40%, 55%, 0.15), 0 0 30px -8px hsla(130, 55%, 40%, 0.2);
+  }
+  
+  .glass-card-active {
+    background: hsla(130, 55%, 40%, 0.15);
+    border-color: hsla(130, 55%, 40%, 0.6);
+    box-shadow: 0 0 30px -8px hsla(130, 55%, 40%, 0.3);
+  }
+
+  .glow-primary {
+    box-shadow: 0 0 40px -5px hsla(130, 55%, 40%, 0.5), 0 0 80px -10px hsla(130, 55%, 40%, 0.2);
+  }
+
+  .tech-grid {
+    background-image:
+      linear-gradient(hsla(130, 55%, 40%, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, hsla(130, 55%, 40%, 0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
   }
 }
