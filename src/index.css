@@ -18,6 +18,9 @@
 
     --border: 217 33% 15%;
     --input: 217 33% 15%;
+
+    --whatsapp: 142 70% 49%;
+    --whatsapp-dark: 162 49% 38%;
   }
 
   * {
@@ -574,13 +577,61 @@
   .confetti-green-2 { background: #1ed760; top: 6%; left: 65%; animation-name: confetti-fall-green-2; --delay: 0.14s; width: 5px; height: 5px; }
   .confetti-green-3 { background: #25d366; top: 14%; left: 25%; animation-name: confetti-fall-green-1; --delay: 0.2s; border-radius: 50%; }
 
+  /* ─── MISSING GREEN DONE DOT ─── */
+  .step-dot-done.green {
+    background: #25d366;
+    border-color: #25d366;
+  }
+
+  .step-dot-label.done.green {
+    color: #25d366;
+  }
+
+  /* ─── STEP TRANSITION ANIMATIONS (tailwindcss-animate drop-in) ─── */
+  @keyframes tw-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes tw-zoom-in {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes tw-slide-in-from-right-8 {
+    from { opacity: 0; transform: translateX(2rem); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .animate-in {
+    animation-fill-mode: both;
+  }
+
+  .duration-500 {
+    animation-duration: 500ms;
+  }
+
+  .fade-in {
+    animation-name: tw-fade-in;
+  }
+
+  .zoom-in {
+    animation-name: tw-zoom-in;
+  }
+
+  .slide-in-from-right-8 {
+    animation-name: tw-slide-in-from-right-8;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .btn-cta::after { animation: none; }
     .option-card:hover { transform: none; }
     .success-icon-animate { animation: none; }
     .confetti-piece { display: none; }
-    .blob-1, .blob-2 { animation: none; }
-    .bg-scanline::after { animation: none; }
+    .animate-in { animation: none; }
+    .fade-in { animation: none; }
+    .zoom-in { animation: none; }
+    .slide-in-from-right-8 { animation: none; }
   }
 }
 

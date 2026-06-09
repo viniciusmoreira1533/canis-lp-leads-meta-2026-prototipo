@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import { useState, type ChangeEvent, type FocusEvent, type FormEvent, type KeyboardEvent } from 'react';
 import { ArrowRight, ArrowLeft, CheckCircle2, ChevronRight, Loader2, ShieldCheck } from 'lucide-react';
 import {
   WEBHOOK_URL,
   WHATSAPP_NUMBER,
+  PRICE,
   PROJECT_TYPE_LABELS,
   PROJECT_STATUS_LABELS,
   PROJECT_STATUS_OPTIONS,
@@ -26,14 +27,14 @@ const WHATSAPP_MESSAGE_QUALIFIED = (
   produto: string,
   estado: string,
 ) =>
-  `Oi, meu nome é ${nome}. Vi o anuncio na meta sobre os prototipos, preciso de um prototipo de ${produto}, atualmente meu projeto esta ${estado}. Gostaria de conversar.`;
+  `Oi, meu nome é ${nome}. Vi o anúncio na Meta sobre os protótipos, preciso de um protótipo de ${produto}, atualmente meu projeto está ${estado}. Gostaria de conversar.`;
 
 const WHATSAPP_MESSAGE_UNQUALIFIED = (
   nome: string,
   produto: string,
   estado: string,
 ) =>
-  `Oi, meu nome é ${nome}. Vi o anuncio sobre os prototipos. Meu projeto e um ${produto} e esta ${estado}. Meu orcamento e menor no momento, mas gostaria de conversar sobre alternativas.`;
+  `Oi, meu nome é ${nome}. Vi o anúncio sobre os protótipos. Meu projeto é um ${produto} e está ${estado}. Meu orçamento é menor no momento, mas gostaria de conversar sobre alternativas.`;
 
 const formatWhatsApp = (value: string): string => {
   const digits = value.replace(/\D/g, '').slice(0, 11);
@@ -82,7 +83,7 @@ function App() {
     setTimeout(() => goToStep(nextStep), 300);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -90,7 +91,7 @@ function App() {
     }));
   };
 
-  const handleInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+  const handleInputBlur = (e: FocusEvent<HTMLInputElement>) => {
     setTouchedFields((prev) => ({ ...prev, [e.target.name]: true }));
   };
 
@@ -110,7 +111,7 @@ function App() {
     return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
     const allTouched: Record<string, boolean> = {};
@@ -163,7 +164,7 @@ function App() {
     tabIndex: 0,
     'aria-pressed': formData[field] === value,
     onClick: () => handleSelect(field, value, nextStep),
-    onKeyDown: (e: React.KeyboardEvent) => {
+    onKeyDown: (e: KeyboardEvent) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         handleSelect(field, value, nextStep);
@@ -259,7 +260,7 @@ function App() {
 
       <div className="w-full glass-card rounded-2xl p-6 md:p-8 text-left text-foreground/90 space-y-4 border-gold-left glow-gold">
         <p className="font-medium text-lg border-b border-border/50 pb-4">
-          Por um investimento de <span className="text-gold font-semibold text-xl">R$ 1.800</span>, o pacote de Protótipo da{' '}
+          Por um investimento de <span className="text-gold font-semibold text-xl">{PRICE}</span>, o pacote de Protótipo da{' '}
           <span className="text-primary font-semibold">Canis</span> entrega:
         </p>
         <ul className="space-y-3 pt-2">
@@ -283,7 +284,7 @@ function App() {
 
       <button
         onClick={() => goToStep('step1')}
-        className="btn-cta w-full md:w-auto glow-primary shimmer-gold relative inline-flex items-center justify-center px-10 py-5 font-bold text-white transition-all duration-300 ease-in-out bg-primary rounded-xl hover:brightness-110 hover:scale-[1.03] active:scale-95 focus:outline-none group"
+        className="btn-cta w-full md:w-auto glow-primary shimmer-gold relative inline-flex items-center justify-center px-10 py-5 font-bold text-white transition-all duration-300 ease-in-out bg-primary rounded-xl hover:brightness-110 hover:scale-[1.03] active:scale-95 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background group"
       >
         <span className="text-lg">Começar Agora</span>
         <ArrowRight className="w-6 h-6 ml-3 transition-transform duration-300 group-hover:translate-x-1" />
@@ -346,7 +347,7 @@ function App() {
   const renderStep3 = () => (
     <div className="w-full max-w-2xl mx-auto space-y-4 animate-in slide-in-from-right-8 fade-in duration-500 mt-6">
       <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-6">
-        O investimento para um MVP parte de R$ 1.800. Como você planeja investir?
+        O investimento para um MVP parte de {PRICE}. Como você planeja investir?
       </h2>
       <div className="space-y-3">
         {BUDGET_OPTIONS.map((option) => (
@@ -513,7 +514,14 @@ function App() {
 
         {isFormStep && (
           <div className="flex flex-col items-center gap-3 w-full max-w-xs px-4">
-            <div className="progress-bar-track w-full h-1.5">
+            <div
+              className="progress-bar-track w-full h-1.5"
+              role="progressbar"
+              aria-valuenow={Math.round(progressPercentage)}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label={`Progresso: passo ${currentIndex} de 4`}
+            >
               <div
                 className={`progress-bar-fill ${currentStep === 'step4' ? 'final-step' : ''}`}
                 style={{ width: `${progressPercentage}%` }}
