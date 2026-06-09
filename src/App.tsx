@@ -326,7 +326,7 @@ function App() {
     <div className="min-h-screen bg-background flex flex-col font-sans selection:bg-primary/30 tech-grid relative overflow-x-hidden">
       {/* Decorative gradients */}
       <div className="fixed top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-primary/10 blur-[150px] pointer-events-none" />
-      <div className="fixed bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-blue-900/10 blur-[150px] pointer-events-none" />
+      <div className="fixed bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-[#2e7d89]/10 blur-[150px] pointer-events-none" />
 
       {/* Header com Barra de Progresso */}
       <header className="fixed top-0 left-0 right-0 z-50">
