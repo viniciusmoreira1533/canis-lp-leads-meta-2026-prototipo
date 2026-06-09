@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowRight, CheckCircle2, ChevronRight, XCircle, Loader2 } from 'lucide-react';
+import { ArrowRight, CheckCircle2, ChevronRight, Loader2 } from 'lucide-react';
 
 type StepType = 'intro' | 'step1' | 'step2' | 'step3' | 'step4' | 'success' | 'unqualified';
 
@@ -299,21 +299,28 @@ function App() {
   );
 
   const renderUnqualified = () => (
-    <div className="flex flex-col items-center justify-center text-center space-y-6 animate-in zoom-in fade-in duration-500 mt-10">
-      <div className="w-24 h-24 glass-card rounded-full flex items-center justify-center mb-4">
-        <XCircle className="w-12 h-12 text-muted-foreground" />
+    <div className="flex flex-col items-center justify-center text-center space-y-6 animate-in zoom-in fade-in duration-500 mt-10 relative">
+      {/* Confetti */}
+      <div className="confetti-piece confetti-1" />
+      <div className="confetti-piece confetti-2" />
+      <div className="confetti-piece confetti-3" />
+      <div className="confetti-piece confetti-4" />
+      <div className="confetti-piece confetti-5" />
+
+      <div className="success-icon-animate w-24 h-24 bg-primary/20 rounded-full flex items-center justify-center mb-4 border border-primary/30 glow-primary">
+        <CheckCircle2 className="w-12 h-12 text-primary" />
       </div>
-      <h2 className="text-2xl md:text-3xl font-bold text-foreground">Agradecemos o interesse!</h2>
-      <p className="text-lg text-muted-foreground max-w-md">
-        Infelizmente no momento nossos pacotes de MVP partem de R$ 1.800.
+      <h2 className="text-3xl md:text-4xl font-bold text-foreground">Recebemos seus dados!</h2>
+      <p className="text-xl text-muted-foreground max-w-md">
+        Entraremos em contato em até 24h. Se preferir, pode me chamar direto no WhatsApp.
       </p>
       <a
-        href="https://instagram.com/alphahouse"
+        href={generateWhatsAppLink()}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center justify-center px-10 py-5 mt-6 font-bold text-lg text-foreground transition-all duration-300 glass-card rounded-xl hover:scale-105"
+        className="btn-cta inline-flex items-center justify-center px-10 py-5 font-bold text-lg text-white transition-all duration-300 bg-[#25D366] rounded-xl hover:bg-[#128C7E] hover:scale-105 shadow-[0_0_30px_rgba(37,211,102,0.3)] mt-4"
       >
-        Acompanhar no Instagram
+        Falar no WhatsApp
       </a>
     </div>
   );
