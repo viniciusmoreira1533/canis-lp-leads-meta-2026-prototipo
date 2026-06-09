@@ -10,7 +10,7 @@ export default {
         background: "hsl(var(--background) / <alpha-value>)",
         foreground: "hsl(var(--foreground) / <alpha-value>)",
         primary: {
-          DEFAULT: "hsl(var(--primary) / <alpha-value>)",
+          DEFAULT: "#2e7d89",
           foreground: "hsl(var(--primary-foreground) / <alpha-value>)",
         },
         card: {
