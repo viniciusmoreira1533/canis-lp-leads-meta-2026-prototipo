@@ -338,7 +338,7 @@ function App() {
         </div>
         <div className="max-w-3xl mx-auto px-6 py-4 flex justify-between items-center bg-background/60 backdrop-blur-xl border-b border-border/50 rounded-b-2xl">
           <div className="flex items-center gap-2">
-            <img src="/canis_logo.webp" alt="Canis Logo" className="h-8 object-contain drop-shadow-[0_0_15px_rgba(37,211,102,0.3)]" />
+            <img src="/canis_logo.webp" alt="Canis Logo" className="h-8 object-contain drop-shadow-[0_0_15px_rgba(46,125,137,0.3)]" />
           </div>
           {currentStep !== 'intro' && currentStep !== 'success' && currentStep !== 'unqualified' && (
             <span className="text-sm font-medium text-muted-foreground bg-card/50 px-3 py-1 rounded-full border border-border/50">
