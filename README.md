@@ -1,4 +1,4 @@
-# 🐕 Landing Page — Captação de Leads (Meta Ads) · Canis / Alpha House
+# 🐕 Landing Page — Captação de Leads (Meta Ads) · Canis
 
 > Funil de pré-qualificação de leads para campanhas de tráfego pago no Meta (Facebook/Instagram Ads), focado em conversão de protótipos de software.
 
@@ -350,4 +350,4 @@ Dúvidas ou ajustes? Fala comigo no WhatsApp ou abre uma issue no repositório.
 
 ---
 
-*Desenvolvido para Canis / Alpha House — Campanha Meta Ads 2025*
+*Desenvolvido para Canis — Campanha Meta Ads 2025*

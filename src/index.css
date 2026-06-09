@@ -285,6 +285,149 @@
     will-change: transform;
   }
 
+  /* ─── STEP DOTS ─── */
+  .step-dots-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+  }
+
+  .step-dot-wrapper {
+    display: flex;
+    align-items: center;
+  }
+
+  .step-dot {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+    transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+    border: 2px solid hsla(188, 50%, 36%, 0.3);
+    background: hsla(222, 47%, 6%, 0.9);
+    color: hsl(var(--muted-foreground));
+  }
+
+  .step-dot-active {
+    background: hsla(188, 50%, 36%, 0.25);
+    border-color: #2e7d89;
+    color: #fff;
+    box-shadow: 0 0 16px -2px hsla(188, 50%, 36%, 0.5);
+  }
+
+  .step-dot-done {
+    background: #2e7d89;
+    border-color: #2e7d89;
+    color: #fff;
+    cursor: pointer;
+  }
+
+  .step-dot-done:hover {
+    background: hsl(188, 55%, 42%);
+    box-shadow: 0 0 16px -2px hsla(188, 50%, 36%, 0.5);
+  }
+
+  .step-dot-connector {
+    width: 32px;
+    height: 2px;
+    background: hsla(188, 50%, 36%, 0.2);
+    margin: 0 2px;
+    transition: background 0.3s ease;
+  }
+
+  .step-dot-connector.done {
+    background: #2e7d89;
+  }
+
+  .step-dot-label {
+    font-size: 10px;
+    color: hsl(var(--muted-foreground));
+    margin-top: 4px;
+    text-align: center;
+    transition: color 0.3s ease;
+  }
+
+  .step-dot-label.active {
+    color: #fff;
+  }
+
+  .step-dot-label.done {
+    color: #2e7d89;
+  }
+
+  /* ─── BACK BUTTON ─── */
+  .btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 10px;
+    border: 1px solid hsla(188, 50%, 36%, 0.2);
+    background: transparent;
+    color: hsl(var(--muted-foreground));
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+  }
+
+  .btn-back:hover {
+    border-color: hsla(188, 50%, 36%, 0.5);
+    color: #fff;
+    background: hsla(188, 50%, 36%, 0.08);
+  }
+
+  /* ─── INPUT VALIDATION ─── */
+  .input-styled.input-valid {
+    border-color: hsla(142, 71%, 45%, 0.5);
+    box-shadow: 0 0 0 2px hsla(142, 71%, 45%, 0.1);
+  }
+
+  .input-styled.input-invalid {
+    border-color: hsla(0, 84%, 60%, 0.5);
+    box-shadow: 0 0 0 2px hsla(0, 84%, 60%, 0.1);
+  }
+
+  .validation-msg {
+    font-size: 12px;
+    margin-top: 4px;
+    color: hsl(0, 84%, 60%);
+  }
+
+  /* ─── LGPD BADGE ─── */
+  .lgpd-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 9999px;
+    background: hsla(222, 47%, 8%, 0.8);
+    border: 1px solid hsla(188, 50%, 36%, 0.15);
+    font-size: 11px;
+    color: hsl(var(--muted-foreground));
+    backdrop-filter: blur(8px);
+  }
+
+  /* ─── SOCIAL PROOF ─── */
+  .social-proof {
+    text-align: center;
+    padding: 12px 20px;
+    border-radius: 12px;
+    background: hsla(188, 50%, 36%, 0.06);
+    border: 1px solid hsla(188, 50%, 36%, 0.12);
+    font-size: 14px;
+    color: hsl(var(--muted-foreground));
+  }
+
+  .social-proof strong {
+    color: #fff;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .btn-cta::after { animation: none; }
     .option-card:hover { transform: none; }
