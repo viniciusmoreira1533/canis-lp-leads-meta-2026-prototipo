@@ -147,9 +147,7 @@ function App() {
             key={id}
             onClick={() => handleSelect('projectType', id, 'step2')}
             className={`w-full flex items-center justify-between p-5 rounded-2xl text-left cursor-pointer ${
-              formData.projectType === id
-                ? 'option-card-active'
-                : 'option-card text-muted-foreground hover:text-foreground'
+              formData.projectType === id ? 'option-card-active' : 'option-card'
             }`}
           >
             <span className="text-lg font-medium">{label}</span>
@@ -173,9 +171,7 @@ function App() {
             key={option.id}
             onClick={() => handleSelect('projectStatus', option.id, 'step3')}
             className={`w-full flex items-center justify-between p-5 rounded-2xl text-left cursor-pointer ${
-              formData.projectStatus === option.id
-                ? 'option-card-active'
-                : 'option-card text-muted-foreground hover:text-foreground'
+              formData.projectStatus === option.id ? 'option-card-active' : 'option-card'
             }`}
           >
             <span className="text-lg font-medium">{option.label}</span>
@@ -201,9 +197,7 @@ function App() {
             key={option.id}
             onClick={() => handleSelect('budget', option.id, 'step4')}
             className={`w-full flex items-center justify-between p-5 rounded-2xl text-left cursor-pointer ${
-              formData.budget === option.id
-                ? 'option-card-active'
-                : 'option-card text-muted-foreground hover:text-foreground'
+              formData.budget === option.id ? 'option-card-active' : 'option-card'
             }`}
           >
             <span className="text-lg font-medium">{option.label}</span>
