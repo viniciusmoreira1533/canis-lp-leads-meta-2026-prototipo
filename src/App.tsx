@@ -111,7 +111,7 @@ function App() {
     return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
   };
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleContinue = (e: FormEvent) => {
     e.preventDefault();
 
     const allTouched: Record<string, boolean> = {};
@@ -124,6 +124,11 @@ function App() {
       return;
     }
 
+    goToStep('step2');
+  };
+
+  const submitLead = async (budgetId: string) => {
+    setFormData((prev) => ({ ...prev, budget: budgetId }));
     setIsSubmitting(true);
 
     try {
@@ -133,14 +138,16 @@ function App() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             ...formData,
+            budget: budgetId,
             whatsapp: formData.whatsapp.replace(/\D/g, ''),
             submittedAt: new Date().toISOString(),
-            isQualified: formData.budget !== 'menor',
+            isQualified: budgetId !== 'menor',
+            source: 'lp-prototipos',
           }),
         });
       }
 
-      if (formData.budget === 'menor') {
+      if (budgetId === 'menor') {
         setCurrentStep('unqualified');
       } else {
         if (window.fbq) {
@@ -149,11 +156,24 @@ function App() {
         setCurrentStep('success');
       }
     } catch {
-      setCurrentStep(formData.budget === 'menor' ? 'unqualified' : 'success');
+      setCurrentStep(budgetId === 'menor' ? 'unqualified' : 'success');
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const budgetButtonProps = (value: string) => ({
+    role: 'button' as const,
+    tabIndex: 0,
+    'aria-pressed': formData.budget === value,
+    onClick: () => submitLead(value),
+    onKeyDown: (e: KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        submitLead(value);
+      }
+    },
+  });
 
   const optionButtonProps = (
     field: keyof FormData,
@@ -178,7 +198,7 @@ function App() {
     currentStep === 'step2' ||
     currentStep === 'step3' ||
     currentStep === 'step4';
-  const showBack = currentStep === 'step1' || currentStep === 'step2' || currentStep === 'step3';
+  const showBack = currentStep === 'step2' || currentStep === 'step3' || currentStep === 'step4';
 
   const progressPercentage =
     currentStep === 'intro'
@@ -188,10 +208,10 @@ function App() {
         : (currentIndex / 4) * 100;
 
   const stepDotStates = [
-    { field: 'projectType' as keyof FormData, idx: 1 },
-    { field: 'projectStatus' as keyof FormData, idx: 2 },
-    { field: 'budget' as keyof FormData, idx: 3 },
-    { field: 'name' as keyof FormData, idx: 4 },
+    { field: 'name' as keyof FormData, idx: 1 },
+    { field: 'projectType' as keyof FormData, idx: 2 },
+    { field: 'projectStatus' as keyof FormData, idx: 3 },
+    { field: 'budget' as keyof FormData, idx: 4 },
   ];
 
   const renderStepDots = () => (
@@ -200,11 +220,10 @@ function App() {
         {stepDotStates.map((dot, i) => {
           const isComplete = !!formData[dot.field];
           const isCurrent = currentIndex === dot.idx;
-          const isGold = dot.idx === 3;
-          const isGreen = dot.idx === 4;
+          const isGold = dot.idx === 4;
           let className = 'step-dot';
-          if (isComplete && !isCurrent) className = `step-dot step-dot-done ${isGold ? 'gold' : isGreen ? 'green' : ''}`;
-          else if (isCurrent) className = `step-dot step-dot-active ${isGold ? 'gold' : isGreen ? 'green' : ''}`;
+          if (isComplete && !isCurrent) className = `step-dot step-dot-done ${isGold ? 'gold' : ''}`;
+          else if (isCurrent) className = `step-dot step-dot-active ${isGold ? 'gold' : ''}`;
 
           const handleDotClick = () => {
             if (isComplete && !isCurrent) {
@@ -234,7 +253,7 @@ function App() {
                   )}
                 </button>
                 <span
-                  className={`step-dot-label ${isCurrent ? 'active' : ''} ${isComplete && !isCurrent ? `done ${isGold ? 'gold' : isGreen ? 'green' : ''}` : ''}`}
+                  className={`step-dot-label ${isCurrent ? 'active' : ''} ${isComplete && !isCurrent ? `done ${isGold ? 'gold' : ''}` : ''}`}
                 >
                   {STEP_DOT_LABELS[i]}
                 </span>
@@ -293,91 +312,13 @@ function App() {
   );
 
   const renderStep1 = () => (
-    <div className="w-full max-w-2xl mx-auto space-y-4 animate-in slide-in-from-right-8 fade-in duration-500 mt-6">
-      <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-6">
-        Qual o seu tipo de projeto que deseja desenvolver?
-      </h2>
-      <div className="space-y-3">
-        {Object.entries(PROJECT_TYPE_LABELS).map(([id, label]) => (
-          <button
-            key={id}
-            {...optionButtonProps('projectType', id, 'step2')}
-            className={`w-full flex items-center justify-between p-5 rounded-2xl text-left cursor-pointer ${
-              formData.projectType === id ? 'option-card-active' : 'option-card'
-            }`}
-          >
-            <span className="text-lg font-medium">{label}</span>
-            <ChevronRight
-              className={`w-5 h-5 shrink-0 transition-transform duration-200 ${
-                formData.projectType === id ? 'text-primary translate-x-1' : 'text-primary/40'
-              }`}
-            />
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-
-  const renderStep2 = () => (
-    <div className="w-full max-w-2xl mx-auto space-y-4 animate-in slide-in-from-right-8 fade-in duration-500 mt-6">
-      <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-6">
-        Qual é o status atual do seu projeto?
-      </h2>
-      <div className="space-y-3">
-        {PROJECT_STATUS_OPTIONS.map((option) => (
-          <button
-            key={option.id}
-            {...optionButtonProps('projectStatus', option.id, 'step3')}
-            className={`w-full flex items-center justify-between p-5 rounded-2xl text-left cursor-pointer ${
-              formData.projectStatus === option.id ? 'option-card-active' : 'option-card'
-            }`}
-          >
-            <span className="text-lg font-medium">{option.label}</span>
-            <ChevronRight
-              className={`w-5 h-5 shrink-0 transition-transform duration-200 ${
-                formData.projectStatus === option.id ? 'text-primary translate-x-1' : 'text-primary/40'
-              }`}
-            />
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-
-  const renderStep3 = () => (
-    <div className="w-full max-w-2xl mx-auto space-y-4 animate-in slide-in-from-right-8 fade-in duration-500 mt-6">
-      <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-6">
-        O investimento para um MVP parte de {PRICE}. Como você planeja investir?
-      </h2>
-      <div className="space-y-3">
-        {BUDGET_OPTIONS.map((option) => (
-          <button
-            key={option.id}
-            {...optionButtonProps('budget', option.id, 'step4')}
-            className={`w-full flex items-center justify-between p-5 rounded-2xl text-left cursor-pointer gold-accent ${
-              formData.budget === option.id ? 'option-card-active' : 'option-card'
-            }`}
-          >
-            <span className="text-lg font-medium">{option.label}</span>
-            <ChevronRight
-              className={`w-5 h-5 shrink-0 transition-transform duration-200 ${
-                formData.budget === option.id ? 'text-primary translate-x-1' : 'text-primary/40'
-              }`}
-            />
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-
-  const renderStep4 = () => (
     <div className="w-full max-w-xl mx-auto animate-in slide-in-from-right-8 fade-in duration-500 mt-6">
-      <h2 className="text-3xl font-bold text-foreground mb-2 text-center">Quase lá!</h2>
+      <h2 className="text-3xl font-bold text-foreground mb-2 text-center">Vamos começar?</h2>
       <p className="text-muted-foreground text-center mb-8 text-lg">
         Para onde enviamos os detalhes?
       </p>
 
-      <form onSubmit={handleSubmit} className="space-y-5 glass-card p-8 rounded-2xl border-primary/20">
+      <form onSubmit={handleContinue} className="space-y-5 glass-card p-8 rounded-2xl border-primary/20">
         <div>
           <label htmlFor="name" className="block text-sm font-medium text-muted-foreground mb-2">
             Nome completo
@@ -445,21 +386,90 @@ function App() {
 
         <button
           type="submit"
-          disabled={isSubmitting}
-          className="btn-cta w-full flex items-center justify-center px-8 py-5 mt-4 font-bold text-lg text-white transition-all duration-300 ease-in-out bg-primary rounded-xl hover:brightness-110 hover:scale-[1.02] active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed glow-green shimmer-green"
+          className="btn-cta w-full flex items-center justify-center px-8 py-5 mt-4 font-bold text-lg text-white transition-all duration-300 ease-in-out bg-primary rounded-xl hover:brightness-110 hover:scale-[1.02] active:scale-95 glow-primary shimmer-gold group"
         >
-          {isSubmitting ? (
-            <Loader2 className="w-6 h-6 animate-spin" />
-          ) : (
-            <>
-              <span>Enviar e chamar no WhatsApp</span>
-              <svg className="w-6 h-6 ml-2 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M12.04 0C5.5 0 .16 5.33.16 11.88c0 2.09.55 4.14 1.59 5.94L.06 24l6.3-1.65a11.88 11.88 0 005.68 1.45h.01c6.55 0 11.89-5.33 11.89-11.88A11.83 11.83 0 0012.04 0zm0 21.76h-.01a9.86 9.86 0 01-5.03-1.38l-.36-.21-3.74.98 1-3.65-.24-.37a9.84 9.84 0 011.37-10.1 9.88 9.88 0 016.99-2.89c2.64 0 5.12 1.03 6.99 2.89a9.82 9.82 0 012.89 6.99c0 5.44-4.43 9.87-9.88 9.87zm5.42-7.4c-.29-.15-1.75-.86-2.02-.96-.27-.1-.48-.15-.67.15-.2.3-.77.96-.94 1.16-.18.2-.35.22-.65.07-.3-.14-1.25-.46-2.39-1.47-.88-.79-1.48-1.76-1.65-2.06-.17-.3-.02-.46.13-.6.13-.14.3-.35.44-.52.15-.18.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.61-.92-2.2-.24-.58-.48-.5-.66-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.01-1.04 2.47s1.07 2.88 1.22 3.08c.14.19 2.09 3.2 5.07 4.48.71.31 1.26.49 1.7.63.7.22 1.36.19 1.87.11.57-.08 1.76-.71 2-1.4.25-.7.25-1.29.18-1.41-.08-.13-.27-.2-.57-.35z" />
-              </svg>
-            </>
-          )}
+          <span>Continuar</span>
+          <ArrowRight className="w-6 h-6 ml-2 transition-transform group-hover:translate-x-1" />
         </button>
       </form>
+    </div>
+  );
+
+  const renderStep2 = () => (
+    <div className="w-full max-w-2xl mx-auto space-y-4 animate-in slide-in-from-right-8 fade-in duration-500 mt-6">
+      <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-6">
+        Qual o seu tipo de projeto que deseja desenvolver?
+      </h2>
+      <div className="space-y-3">
+        {Object.entries(PROJECT_TYPE_LABELS).map(([id, label]) => (
+          <button
+            key={id}
+            {...optionButtonProps('projectType', id, 'step3')}
+            className={`w-full flex items-center justify-between p-5 rounded-2xl text-left cursor-pointer ${
+              formData.projectType === id ? 'option-card-active' : 'option-card'
+            }`}
+          >
+            <span className="text-lg font-medium">{label}</span>
+            <ChevronRight
+              className={`w-5 h-5 shrink-0 transition-transform duration-200 ${
+                formData.projectType === id ? 'text-primary translate-x-1' : 'text-primary/40'
+              }`}
+            />
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderStep3 = () => (
+    <div className="w-full max-w-2xl mx-auto space-y-4 animate-in slide-in-from-right-8 fade-in duration-500 mt-6">
+      <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-6">
+        Qual é o status atual do seu projeto?
+      </h2>
+      <div className="space-y-3">
+        {PROJECT_STATUS_OPTIONS.map((option) => (
+          <button
+            key={option.id}
+            {...optionButtonProps('projectStatus', option.id, 'step4')}
+            className={`w-full flex items-center justify-between p-5 rounded-2xl text-left cursor-pointer ${
+              formData.projectStatus === option.id ? 'option-card-active' : 'option-card'
+            }`}
+          >
+            <span className="text-lg font-medium">{option.label}</span>
+            <ChevronRight
+              className={`w-5 h-5 shrink-0 transition-transform duration-200 ${
+                formData.projectStatus === option.id ? 'text-primary translate-x-1' : 'text-primary/40'
+              }`}
+            />
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderStep4 = () => (
+    <div className="w-full max-w-2xl mx-auto space-y-4 animate-in slide-in-from-right-8 fade-in duration-500 mt-6">
+      <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-6">
+        O investimento para um MVP parte de {PRICE}. Como você planeja investir?
+      </h2>
+      <div className="space-y-3">
+        {BUDGET_OPTIONS.map((option) => (
+          <button
+            key={option.id}
+            {...budgetButtonProps(option.id)}
+            className={`w-full flex items-center justify-between p-5 rounded-2xl text-left cursor-pointer gold-accent ${
+              formData.budget === option.id ? 'option-card-active' : 'option-card'
+            }`}
+          >
+            <span className="text-lg font-medium">{option.label}</span>
+            {isSubmitting ? (
+              <Loader2 className="w-5 h-5 shrink-0 text-primary animate-spin" />
+            ) : (
+              <ChevronRight className="w-5 h-5 shrink-0 text-primary/40 transition-transform duration-200" />
+            )}
+          </button>
+        ))}
+      </div>
     </div>
   );
 

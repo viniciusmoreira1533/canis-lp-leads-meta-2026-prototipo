@@ -1,6 +1,6 @@
 export const WEBHOOK_URL =
   import.meta.env.VITE_WEBHOOK_URL ||
-  'https://n8nwebhook.server2.wolframe.app/webhook/4d138bce-e3ea-44cf-bdc8-246b8d8344b9';
+  'https://n8nwebhook.server2.wolframe.app/webhook/prototipo-canis';
 
 export const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || '5516994613429';
 
@@ -31,4 +31,4 @@ export const BUDGET_OPTIONS = [
   { id: 'menor', label: 'Meu orçamento é menor no momento' },
 ];
 
-export const STEP_DOT_LABELS = ['Projeto', 'Status', 'Orçamento', 'Dados'];
+export const STEP_DOT_LABELS = ['Dados', 'Projeto', 'Status', 'Orçamento'];
