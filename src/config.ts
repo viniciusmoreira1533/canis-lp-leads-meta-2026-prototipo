@@ -2,7 +2,7 @@ export const WEBHOOK_URL =
   import.meta.env.VITE_WEBHOOK_URL ||
   'https://n8nwebhook.server2.wolframe.app/webhook/prototipo-canis';
 
-export const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || '5516994613429';
+export const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || '5516976158102';
 
 export const PRICE = 'R$ 1.800';
 
