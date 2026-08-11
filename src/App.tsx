@@ -1,4 +1,5 @@
 import { useState, type ChangeEvent, type FocusEvent, type FormEvent, type KeyboardEvent } from 'react';
+import { SiWhatsapp } from 'react-icons/si';
 import { ArrowRight, ArrowLeft, CheckCircle2, ChevronRight, Loader2, ShieldCheck, Zap } from 'lucide-react';
 import {
   WEBHOOK_URL,
@@ -42,12 +43,6 @@ const formatWhatsApp = (value: string): string => {
   if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
   return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
 };
-
-const WhatsAppIcon = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
-    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.312.149.437.272.546.53.63.258.084.775.251 1.275.428 1.15.406 1.41.469 1.59.454.15-.012.478-.156.73-.41.25-.256.57-.832.72-1.126.15-.293.3-.611.153-.874-.149-.263-.643-1.188-.89-1.377-.247-.19-.416-.244-.56-.244-.15 0-.39-.06-.61-.029-.22.03-1.006.94-1.162 1.13-.155.189-.31.213-.57.075-.26-.139-1.103-.512-2.102-1.027-.777-.4-1.3-.664-1.45-.866-.155-.202-.17-.307-.258-.42-.09-.12-.185-.38-.23-.578-.045-.2-.09-.425-.045-.636.045-.21.28-.317.42-.36.13-.038.29-.075.42-.15.13-.075.22-.34.3-.57.075-.23.037-.42-.02-.585-.06-.165-.67-1.62-.92-2.22-.24-.58-.48-.5-.69-.51h-.49c-.17 0-.45.064-.68.3-.23.24-.9.886-.9 2.16 0 1.275.926 2.506 1.056 2.68.13.174 1.824 2.8 4.42 3.927.618.268 1.1.428 1.477.548.62.19 1.18.16 1.62.1.497-.074 1.53-.63 1.746-1.24.216-.61.216-1.13.156-1.24-.06-.11-.22-.18-.465-.31M12.05 0C5.396 0 0 5.4 0 12.052c0 2.13.55 4.21 1.597 6.045L.05 24l6.004-1.574a12.03 12.03 0 0 0 5.998 1.53c6.652 0 12.05-5.4 12.05-12.05S18.704 0 12.05 0Z" />
-  </svg>
-);
 
 declare global {
   interface Window {
@@ -317,7 +312,7 @@ function App() {
           onClick={() => goToStep('step1')}
           className="btn-cta w-full md:w-auto pulse-green shimmer-green relative inline-flex items-center justify-center px-10 py-5 font-bold text-white transition-all duration-300 ease-in-out bg-[#25D366] rounded-xl hover:bg-[#128C7E] hover:scale-[1.03] active:scale-95 focus-visible:ring-2 focus-visible:ring-[#25D366] focus-visible:ring-offset-2 focus-visible:ring-offset-background group"
         >
-          <WhatsAppIcon className="w-6 h-6 mr-3 shrink-0" />
+          <SiWhatsapp className="w-6 h-6 mr-3 shrink-0" />
           <span className="text-lg">Preencher e chamar no Whatsapp</span>
         </button>
 
