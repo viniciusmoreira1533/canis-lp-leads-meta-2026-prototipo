@@ -1,6 +1,4 @@
-import { useState, type ChangeEvent, type FocusEvent, type FormEvent, type KeyboardEvent } from 'react';
-import { SiWhatsapp } from 'react-icons/si';
-import { ArrowRight, ArrowLeft, CheckCircle2, ChevronRight, Loader2, ShieldCheck, Zap } from 'lucide-react';
+import { useEffect, useRef, useState, type ChangeEvent, type FocusEvent, type FormEvent } from 'react';
 import {
   WEBHOOK_URL,
   WHATSAPP_NUMBER,
@@ -9,32 +7,27 @@ import {
   PROJECT_STATUS_LABELS,
   PROJECT_STATUS_OPTIONS,
   BUDGET_OPTIONS,
-  STEP_DOT_LABELS,
 } from './config';
 
-type StepType = 'intro' | 'step1' | 'step2' | 'step3' | 'step4' | 'success' | 'unqualified';
+type PageId =
+  | 'hero'
+  | 'oferta'
+  | 'pipe'
+  | 'passos'
+  | 'q-tipo'
+  | 'q-status'
+  | 'q-orc'
+  | 'q-dados'
+  | 'success';
 
-interface FormData {
-  projectType: string;
-  projectStatus: string;
-  budget: string;
-  name: string;
-  email: string;
-  whatsapp: string;
-}
+const PAGES: PageId[] = ['hero', 'oferta', 'pipe', 'passos', 'q-tipo', 'q-status', 'q-orc', 'q-dados', 'success'];
+const NAV_CAPS: PageId[] = ['hero', 'oferta', 'pipe', 'passos'];
+const QUIZ_PAGES: PageId[] = ['q-tipo', 'q-status', 'q-orc', 'q-dados'];
 
-const WHATSAPP_MESSAGE_QUALIFIED = (
-  nome: string,
-  produto: string,
-  estado: string,
-) =>
+const WHATSAPP_MESSAGE_QUALIFIED = (nome: string, produto: string, estado: string) =>
   `Oi, meu nome é ${nome}. Vi o anúncio na Meta sobre os protótipos, preciso de um protótipo de ${produto}, atualmente meu projeto está ${estado}. Gostaria de conversar.`;
 
-const WHATSAPP_MESSAGE_UNQUALIFIED = (
-  nome: string,
-  produto: string,
-  estado: string,
-) =>
+const WHATSAPP_MESSAGE_UNQUALIFIED = (nome: string, produto: string, estado: string) =>
   `Oi, meu nome é ${nome}. Vi o anúncio sobre os protótipos. Meu projeto é um ${produto} e está ${estado}. Meu orçamento é menor no momento, mas gostaria de conversar sobre alternativas.`;
 
 const formatWhatsApp = (value: string): string => {
@@ -50,43 +43,90 @@ declare global {
   }
 }
 
-const STEP_ORDER: StepType[] = ['intro', 'step1', 'step2', 'step3', 'step4'];
+interface Answers {
+  tipo?: string;
+  status?: string;
+  orc?: string;
+  name?: string;
+  email?: string;
+  whatsapp?: string;
+}
 
 function App() {
-  const [currentStep, setCurrentStep] = useState<StepType>('intro');
-  const [stepHistory, setStepHistory] = useState<StepType[]>(['intro']);
-  const [formData, setFormData] = useState<FormData>({
-    projectType: '',
-    projectStatus: '',
-    budget: '',
-    name: '',
-    email: '',
-    whatsapp: '',
+  const [current, setCurrent] = useState<PageId>(() => {
+    const m = location.hash.match(/^#\/(\d+)/);
+    if (!m) return 'hero';
+    const idx = Math.min(PAGES.length - 1, parseInt(m[1], 10));
+    return PAGES[idx];
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [locked, setLocked] = useState(false);
+  const [answers, setAnswers] = useState<Answers>({});
   const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const lockTimer = useRef<number | null>(null);
 
-  const goToStep = (step: StepType) => {
-    setStepHistory((prev) => [...prev, step]);
-    setCurrentStep(step);
+  const lock = () => {
+    if (lockTimer.current) window.clearTimeout(lockTimer.current);
+    setLocked(true);
+    lockTimer.current = window.setTimeout(() => setLocked(false), 1500);
   };
 
-  const goBack = () => {
-    if (stepHistory.length <= 1) return;
-    const newHistory = [...stepHistory];
-    newHistory.pop();
-    setStepHistory(newHistory);
-    setCurrentStep(newHistory[newHistory.length - 1]);
+  const goto = (target: PageId) => {
+    setCurrent(target);
+    lock();
+    try {
+      history.replaceState(null, '', '#/' + PAGES.indexOf(target));
+    } catch {
+      /* ignore */
+    }
   };
 
-  const handleSelect = (field: keyof FormData, value: string, nextStep: StepType) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    setTimeout(() => goToStep(nextStep), 300);
+  const readHash = (): PageId => {
+    const m = location.hash.match(/^#\/(\d+)/);
+    if (!m) return 'hero';
+    const idx = Math.min(PAGES.length - 1, parseInt(m[1], 10));
+    return PAGES[idx];
+  };
+
+  useEffect(() => {
+    const onHash = () => setCurrent(readHash());
+    window.addEventListener('hashchange', onHash);
+    return () => {
+      window.removeEventListener('hashchange', onHash);
+      if (lockTimer.current) window.clearTimeout(lockTimer.current);
+    };
+  }, []);
+
+  const isQuiz = QUIZ_PAGES.includes(current);
+  const isSuccess = current === 'success';
+  const isFirst = current === 'hero';
+  const idx = PAGES.indexOf(current);
+  const isCap = NAV_CAPS.includes(current);
+
+  const generateWhatsAppLink = () => {
+    const produto = PROJECT_TYPE_LABELS[answers.tipo || ''] || 'tecnologia';
+    const estado = PROJECT_STATUS_LABELS[answers.status || ''] || 'em planejamento';
+    const isQualified = answers.orc !== 'menor';
+    const text = isQualified
+      ? WHATSAPP_MESSAGE_QUALIFIED(answers.name || '', produto, estado)
+      : WHATSAPP_MESSAGE_UNQUALIFIED(answers.name || '', produto, estado);
+    return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
+  };
+
+  const handleSelect = (field: keyof Answers, value: string) => {
+    if (locked) return;
+    setAnswers((prev) => ({ ...prev, [field]: value }));
+    const next: Partial<Record<PageId, PageId>> = {
+      'q-tipo': 'q-status',
+      'q-status': 'q-orc',
+      'q-orc': 'q-dados',
+    };
+    goto(next[current] || 'success');
   };
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
+    setAnswers((prev) => ({
       ...prev,
       [name]: name === 'whatsapp' ? formatWhatsApp(value) : value,
     }));
@@ -96,40 +136,25 @@ function App() {
     setTouchedFields((prev) => ({ ...prev, [e.target.name]: true }));
   };
 
-  const getInputClassName = (name: string, value: string) => {
-    const base = 'input-styled w-full px-4 py-4 rounded-xl text-lg';
+  const getInputClassName = (name: string, value: string | undefined) => {
+    const base = 'field-input';
     if (!touchedFields[name]) return base;
-    if (value.trim()) return `${base} input-valid`;
+    if (value && value.trim()) return `${base} input-valid`;
     return `${base} input-invalid`;
   };
 
-  const generateWhatsAppLink = (isQualified: boolean) => {
-    const produto = PROJECT_TYPE_LABELS[formData.projectType] || 'tecnologia';
-    const estado = PROJECT_STATUS_LABELS[formData.projectStatus] || 'em planejamento';
-    const text = isQualified
-      ? WHATSAPP_MESSAGE_QUALIFIED(formData.name, produto, estado)
-      : WHATSAPP_MESSAGE_UNQUALIFIED(formData.name, produto, estado);
-    return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
-  };
-
-  const handleContinue = (e: FormEvent) => {
+  const submitLead = async (e: FormEvent) => {
     e.preventDefault();
-
-    const allTouched: Record<string, boolean> = {};
-    (['name', 'email', 'whatsapp'] as const).forEach((f) => {
-      allTouched[f] = true;
-    });
+    if (locked) return;
+    const allTouched: Record<string, boolean> = { name: true, email: true, whatsapp: true };
     setTouchedFields((prev) => ({ ...prev, ...allTouched }));
 
-    if (!formData.name.trim() || !formData.email.trim() || !formData.whatsapp.trim()) {
-      return;
-    }
+    const name = (answers.name || '').trim();
+    const email = (answers.email || '').trim();
+    const whatsapp = (answers.whatsapp || '').trim();
+    if (!name || !email || !whatsapp) return;
 
-    goToStep('step2');
-  };
-
-  const submitLead = async (budgetId: string) => {
-    setFormData((prev) => ({ ...prev, budget: budgetId }));
+    const isQualified = answers.orc !== 'menor';
     setIsSubmitting(true);
 
     try {
@@ -138,452 +163,370 @@ function App() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            ...formData,
-            budget: budgetId,
-            whatsapp: formData.whatsapp.replace(/\D/g, ''),
+            projectType: answers.tipo,
+            projectStatus: answers.status,
+            budget: answers.orc,
+            name,
+            email,
+            whatsapp: whatsapp.replace(/\D/g, ''),
             submittedAt: new Date().toISOString(),
-            isQualified: budgetId !== 'menor',
+            isQualified,
             source: 'lp-prototipos',
           }),
         });
       }
 
-      if (budgetId === 'menor') {
-        setCurrentStep('unqualified');
-      } else {
-        if (window.fbq) {
-          window.fbq('track', 'Lead');
-        }
-        setCurrentStep('success');
+      if (isQualified && window.fbq) {
+        window.fbq('track', 'Lead');
       }
     } catch {
-      setCurrentStep(budgetId === 'menor' ? 'unqualified' : 'success');
+      // segue para o sucesso mesmo se o webhook falhar
     } finally {
       setIsSubmitting(false);
+      goto('success');
     }
   };
 
-  const budgetButtonProps = (value: string) => ({
-    role: 'button' as const,
-    tabIndex: 0,
-    'aria-pressed': formData.budget === value,
-    onClick: () => submitLead(value),
-    onKeyDown: (e: KeyboardEvent) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        submitLead(value);
-      }
-    },
-  });
-
-  const optionButtonProps = (
-    field: keyof FormData,
-    value: string,
-    nextStep: StepType,
-  ) => ({
-    role: 'button' as const,
-    tabIndex: 0,
-    'aria-pressed': formData[field] === value,
-    onClick: () => handleSelect(field, value, nextStep),
-    onKeyDown: (e: KeyboardEvent) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        handleSelect(field, value, nextStep);
-      }
-    },
-  });
-
-  const currentIndex = STEP_ORDER.indexOf(currentStep);
-  const isFormStep =
-    currentStep === 'step1' ||
-    currentStep === 'step2' ||
-    currentStep === 'step3' ||
-    currentStep === 'step4';
-  const showBack = currentStep === 'step2' || currentStep === 'step3' || currentStep === 'step4';
-
-  const progressPercentage =
-    currentStep === 'intro'
-      ? 0
-      : currentStep === 'success' || currentStep === 'unqualified'
-        ? 100
-        : (currentIndex / 4) * 100;
-
-  const stepDotStates = [
-    { field: 'name' as keyof FormData, idx: 1 },
-    { field: 'projectType' as keyof FormData, idx: 2 },
-    { field: 'projectStatus' as keyof FormData, idx: 3 },
-    { field: 'budget' as keyof FormData, idx: 4 },
-  ];
-
-  const renderStepDots = () => (
-    <div className="flex flex-col items-center gap-1 w-full max-w-md px-4">
-      <div className="step-dots-row">
-        {stepDotStates.map((dot, i) => {
-          const isComplete = !!formData[dot.field];
-          const isCurrent = currentIndex === dot.idx;
-          const isGold = dot.idx === 4;
-          let className = 'step-dot';
-          if (isComplete && !isCurrent) className = `step-dot step-dot-done ${isGold ? 'gold' : ''}`;
-          else if (isCurrent) className = `step-dot step-dot-active ${isGold ? 'gold' : ''}`;
-
-          const handleDotClick = () => {
-            if (isComplete && !isCurrent) {
-              const targetStep = STEP_ORDER[dot.idx];
-              setCurrentStep(targetStep);
-              setStepHistory((prev) => {
-                const idx = prev.indexOf(targetStep);
-                return idx !== -1 ? prev.slice(0, idx + 1) : [...prev, targetStep];
-              });
-            }
-          };
-
-          return (
-            <div key={dot.idx} className="step-dot-wrapper">
-              <div className="flex flex-col items-center">
-                <button
-                  type="button"
-                  className={className}
-                  disabled={!isComplete || isCurrent}
-                  onClick={handleDotClick}
-                  aria-label={`Passo ${dot.idx}: ${STEP_DOT_LABELS[i]}`}
-                >
-                  {isComplete && !isCurrent ? (
-                    <CheckCircle2 className="w-4 h-4" />
-                  ) : (
-                    dot.idx
-                  )}
-                </button>
-                <span
-                  className={`step-dot-label ${isCurrent ? 'active' : ''} ${isComplete && !isCurrent ? `done ${isGold ? 'gold' : ''}` : ''}`}
-                >
-                  {STEP_DOT_LABELS[i]}
-                </span>
-              </div>
-              {i < stepDotStates.length - 1 && (
-                <div
-                  className={`step-dot-connector ${isComplete ? `done ${isGold ? 'gold' : ''}` : ''}`}
-                />
-              )}
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-
-  const renderIntro = () => (
-    <div className="flex flex-col items-center justify-center text-center space-y-8 animate-in fade-in zoom-in duration-500 w-full max-w-2xl mx-auto mt-6">
-      <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground leading-tight px-4">
-        Veja seu projeto <span className="text-primary">PRONTO</span> antes de começar a{' '}
-        <span className="text-primary">DESENVOLVER</span>
-      </h1>
-
-      <div className="w-full glass-card rounded-2xl p-6 md:p-8 text-left text-foreground/90 space-y-4 border-gold-left glow-gold">
-        <p className="font-medium text-lg border-b border-border/50 pb-4">
-          Por um investimento de <span className="text-gold font-semibold text-xl">{PRICE}</span>, o pacote de Protótipo da{' '}
-          <span className="text-primary font-semibold">Canis</span> entrega:
-        </p>
-        <ul className="space-y-3 pt-2">
-          {[
-            'Mapeamento da Jornada do Usuário e Arquitetura Técnica.',
-            'Protótipo Visual de Alta Fidelidade.',
-            'Telas interativas prontas para teste.',
-            'Pesquisa de mercado.',
-          ].map((item, idx) => (
-            <li key={idx} className="flex items-start">
-              <CheckCircle2 className="w-5 h-5 text-primary shrink-0 mr-3 mt-0.5" />
-              <span>{item}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="social-proof w-full max-w-md">
-        <strong>+50 empresas</strong> já validaram suas ideias com nossos protótipos
-      </div>
-
-      <div className="w-full max-w-md flex flex-col items-center gap-4">
-        <span className="lgpd-badge">
-          <Zap className="w-3.5 h-3.5 text-[#25D366]" />
-          Leva menos de 1 minuto — só 3 perguntas rápidas
-        </span>
-
-        <button
-          onClick={() => goToStep('step1')}
-          className="btn-cta w-full md:w-auto pulse-green shimmer-green relative inline-flex items-center justify-center px-10 py-5 font-bold text-white transition-all duration-300 ease-in-out bg-[#25D366] rounded-xl hover:bg-[#128C7E] hover:scale-[1.03] active:scale-95 focus-visible:ring-2 focus-visible:ring-[#25D366] focus-visible:ring-offset-2 focus-visible:ring-offset-background group"
-        >
-          <SiWhatsapp className="w-6 h-6 mr-3 shrink-0" />
-          <span className="text-lg">Preencher e chamar no Whatsapp</span>
-        </button>
-
-        <p className="text-sm text-muted-foreground text-center">
-          Seus dados vão direto para o nosso WhatsApp — resposta em até 24h
-        </p>
-      </div>
-    </div>
-  );
-
-  const renderStep1 = () => (
-    <div className="w-full max-w-xl mx-auto animate-in slide-in-from-right-8 fade-in duration-500 mt-6">
-      <h2 className="text-3xl font-bold text-foreground mb-2 text-center">Vamos começar?</h2>
-      <p className="text-muted-foreground text-center mb-8 text-lg">
-        Rápido: só mais 3 perguntas e você fala com a gente no WhatsApp
-      </p>
-
-      <form onSubmit={handleContinue} className="space-y-5 glass-card p-8 rounded-2xl border-primary/20">
-        <div>
-          <label htmlFor="name" className="block text-sm font-medium text-muted-foreground mb-2">
-            Nome completo
-          </label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            required
-            value={formData.name}
-            onChange={handleInputChange}
-            onBlur={handleInputBlur}
-            className={getInputClassName('name', formData.name)}
-            placeholder="Seu nome"
-          />
-          {touchedFields.name && !formData.name.trim() && (
-            <p className="validation-msg">Informe seu nome completo</p>
-          )}
-        </div>
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-muted-foreground mb-2">
-            E-mail de trabalho
-          </label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            required
-            value={formData.email}
-            onChange={handleInputChange}
-            onBlur={handleInputBlur}
-            className={getInputClassName('email', formData.email)}
-            placeholder="seu@email.com"
-          />
-          {touchedFields.email && !formData.email.trim() && (
-            <p className="validation-msg">Informe seu e-mail</p>
-          )}
-        </div>
-        <div>
-          <label htmlFor="whatsapp" className="block text-sm font-medium text-muted-foreground mb-2">
-            WhatsApp
-          </label>
-          <input
-            type="tel"
-            id="whatsapp"
-            name="whatsapp"
-            required
-            value={formData.whatsapp}
-            onChange={handleInputChange}
-            onBlur={handleInputBlur}
-            className={getInputClassName('whatsapp', formData.whatsapp)}
-            placeholder="(11) 99999-9999"
-          />
-          {touchedFields.whatsapp && !formData.whatsapp.trim() && (
-            <p className="validation-msg">Informe seu WhatsApp</p>
-          )}
-        </div>
-
-        <div className="flex justify-center pt-2">
-          <span className="lgpd-badge">
-            <ShieldCheck className="w-3.5 h-3.5 text-primary" />
-            Seus dados estão protegidos — LGPD
-          </span>
-        </div>
-
-        <button
-          type="submit"
-          className="btn-cta w-full flex items-center justify-center px-8 py-5 mt-4 font-bold text-lg text-white transition-all duration-300 ease-in-out bg-primary rounded-xl hover:brightness-110 hover:scale-[1.02] active:scale-95 glow-primary shimmer-gold group"
-        >
-          <span>Continuar</span>
-          <ArrowRight className="w-6 h-6 ml-2 transition-transform group-hover:translate-x-1" />
-        </button>
-      </form>
-    </div>
-  );
-
-  const renderStep2 = () => (
-    <div className="w-full max-w-2xl mx-auto space-y-4 animate-in slide-in-from-right-8 fade-in duration-500 mt-6">
-      <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-6">
-        Que tipo de projeto você quer desenvolver?
-      </h2>
-      <div className="space-y-3">
-        {Object.entries(PROJECT_TYPE_LABELS).map(([id, label]) => (
-          <button
-            key={id}
-            {...optionButtonProps('projectType', id, 'step3')}
-            className={`w-full flex items-center justify-between p-5 rounded-2xl text-left cursor-pointer ${
-              formData.projectType === id ? 'option-card-active' : 'option-card'
-            }`}
-          >
-            <span className="text-lg font-medium">{label}</span>
-            <ChevronRight
-              className={`w-5 h-5 shrink-0 transition-transform duration-200 ${
-                formData.projectType === id ? 'text-primary translate-x-1' : 'text-primary/40'
-              }`}
-            />
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-
-  const renderStep3 = () => (
-    <div className="w-full max-w-2xl mx-auto space-y-4 animate-in slide-in-from-right-8 fade-in duration-500 mt-6">
-      <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-6">
-        Qual o status do seu projeto?
-      </h2>
-      <div className="space-y-3">
-        {PROJECT_STATUS_OPTIONS.map((option) => (
-          <button
-            key={option.id}
-            {...optionButtonProps('projectStatus', option.id, 'step4')}
-            className={`w-full flex items-center justify-between p-5 rounded-2xl text-left cursor-pointer ${
-              formData.projectStatus === option.id ? 'option-card-active' : 'option-card'
-            }`}
-          >
-            <span className="text-lg font-medium">{option.label}</span>
-            <ChevronRight
-              className={`w-5 h-5 shrink-0 transition-transform duration-200 ${
-                formData.projectStatus === option.id ? 'text-primary translate-x-1' : 'text-primary/40'
-              }`}
-            />
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-
-  const renderStep4 = () => (
-    <div className="w-full max-w-2xl mx-auto space-y-4 animate-in slide-in-from-right-8 fade-in duration-500 mt-6">
-      <div className="flex flex-col items-center gap-2 mb-6">
-        <span className="lgpd-badge">
-          <Zap className="w-3.5 h-3.5 text-[#25D366]" />
-          Última pergunta!
-        </span>
-        <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center">
-          O investimento para um MVP parte de {PRICE}. Como você planeja investir?
-        </h2>
-      </div>
-      <div className="space-y-3">
-        {BUDGET_OPTIONS.map((option) => (
-          <button
-            key={option.id}
-            {...budgetButtonProps(option.id)}
-            className={`w-full flex items-center justify-between p-5 rounded-2xl text-left cursor-pointer gold-accent ${
-              formData.budget === option.id ? 'option-card-active' : 'option-card'
-            }`}
-          >
-            <span className="text-lg font-medium">{option.label}</span>
-            {isSubmitting ? (
-              <Loader2 className="w-5 h-5 shrink-0 text-primary animate-spin" />
-            ) : (
-              <ChevronRight className="w-5 h-5 shrink-0 text-primary/40 transition-transform duration-200" />
-            )}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-
-  const renderResult = (isQualified: boolean) => (
-    <div className="flex flex-col items-center justify-center text-center space-y-6 animate-in zoom-in fade-in duration-500 mt-10 relative">
-      <div className="confetti-piece confetti-1" />
-      <div className="confetti-piece confetti-2" />
-      <div className="confetti-piece confetti-3" />
-      <div className="confetti-piece confetti-4" />
-      <div className="confetti-piece confetti-5" />
-      <div className="confetti-piece confetti-gold-1" />
-      <div className="confetti-piece confetti-gold-2" />
-      <div className="confetti-piece confetti-gold-3" />
-      <div className="confetti-piece confetti-gold-4" />
-      <div className="confetti-piece confetti-green-1" />
-      <div className="confetti-piece confetti-green-2" />
-      <div className="confetti-piece confetti-green-3" />
-
-      <div className="success-icon-animate w-24 h-24 bg-[#25D366]/20 rounded-full flex items-center justify-center mb-4 border border-[#25D366]/30 glow-green">
-        <CheckCircle2 className="w-12 h-12 text-[#25D366]" />
-      </div>
-      <h2 className="text-3xl md:text-4xl font-bold text-foreground">Recebemos seus dados!</h2>
-      <p className="text-xl text-muted-foreground max-w-md">
-        Entraremos em contato em até 24h. Se preferir, pode me chamar direto no WhatsApp.
-      </p>
-      <a
-        href={generateWhatsAppLink(isQualified)}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="btn-cta pulse-green inline-flex items-center justify-center px-10 py-5 font-bold text-lg text-white transition-all duration-300 bg-[#25D366] rounded-xl hover:bg-[#128C7E] hover:scale-105 shadow-[0_0_30px_rgba(37,211,102,0.3)] mt-4"
-      >
-        Falar no WhatsApp
-      </a>
-    </div>
-  );
+  const nextLabel = isQuiz || isFirst ? 'Continuar ↓' : 'Continuar →';
 
   return (
-    <div className="min-h-screen bg-background flex flex-col font-sans selection:bg-primary/30 tech-grid relative overflow-x-hidden">
-      <div className="blob-1 fixed top-[-20%] left-[-10%] w-[65%] h-[65%] rounded-full bg-primary/15 blur-[180px] pointer-events-none" />
-      <div className="blob-2 fixed bottom-[-20%] right-[-10%] w-[55%] h-[55%] rounded-full bg-[#2e7d89]/12 blur-[160px] pointer-events-none" />
-      <div className="bg-scanline" />
+    <div className="app-shell">
+      <div className="grid" />
+      <div className="glows" />
 
-      <div className="w-full flex flex-col items-center pt-10 pb-4 relative z-10 space-y-4">
-        <img
-          src="/canis_logo.webp"
-          alt="Canis Logo"
-          className="h-10 object-contain drop-shadow-[0_0_20px_rgba(46,125,137,0.4)]"
-        />
-        <div className="logo-divider">
-          <span className="w-1.5 h-1.5 rounded-full bg-primary/50 block" />
-        </div>
+      <header className="bar">
+        <div className="logo" role="img" aria-label="Canis" />
+      </header>
 
-        {isFormStep && (
-          <div className="flex flex-col items-center gap-3 w-full max-w-xs px-4">
-            <div
-              className="progress-bar-track w-full h-1.5"
-              role="progressbar"
-              aria-valuenow={Math.round(progressPercentage)}
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-label={`Progresso: passo ${currentIndex} de 4`}
-            >
-              <div
-                className={`progress-bar-fill ${currentStep === 'step4' ? 'final-step' : ''}`}
-                style={{ width: `${progressPercentage}%` }}
-              />
-            </div>
-            <span className="text-xs font-medium text-muted-foreground tracking-wide">
-              Passo {currentIndex} de 4
-            </span>
-          </div>
-        )}
-
-        {isFormStep && renderStepDots()}
+      <div className={`dots ${isCap ? 'show' : ''}`}>
+        {NAV_CAPS.map((cap, i) => (
+          <span
+            key={cap}
+            className={`dot ${i < idx ? 'done' : i === idx ? 'active' : ''}`}
+          />
+        ))}
       </div>
 
-      <main className="flex-1 flex flex-col items-center justify-start px-4 md:px-6 pt-2 pb-20 w-full relative z-10">
-        {showBack && (
-          <div className="w-full max-w-2xl mb-4">
-            <button onClick={goBack} className="btn-back">
-              <ArrowLeft className="w-4 h-4" />
-              Voltar
-            </button>
-          </div>
-        )}
+      <div className={`quiz-bar ${isQuiz ? 'show' : ''}`}>
+        {QUIZ_PAGES.map((q, i) => (
+          <span
+            key={q}
+            className={`pill ${i < idx - 4 ? 'done' : i === idx - 4 ? 'active' : ''}`}
+          />
+        ))}
+      </div>
 
-        <div className="w-full max-w-2xl">
-          {currentStep === 'intro' && renderIntro()}
-          {currentStep === 'step1' && renderStep1()}
-          {currentStep === 'step2' && renderStep2()}
-          {currentStep === 'step3' && renderStep3()}
-          {currentStep === 'step4' && renderStep4()}
-          {currentStep === 'success' && renderResult(true)}
-          {currentStep === 'unqualified' && renderResult(false)}
-        </div>
+      <main className="pages">
+        {/* PÁGINA 0 · HERO */}
+        <section className={`page ch-hero ${current === 'hero' ? 'active' : ''}`} id="pg-hero">
+          <div className="page-inner">
+            <span className="badge">Desenvolvimento de apps e sistemas</span>
+            <h1>
+              Seu app ou sistema <em>pronto</em> na tela,{' '}
+              <span className="gold-grad">antes de escrever uma linha de código</span>
+            </h1>
+            <p className="sub">
+              A Canis desenvolve apps e sistemas <b>do zero ao lançamento</b>. O protótipo é a
+              primeira etapa: telas navegáveis, plano de trabalho e orçamento fechado do projeto
+              inteiro.
+            </p>
+          </div>
+        </section>
+
+        {/* PÁGINA 1 · OFERTA */}
+        <section className={`page ${current === 'oferta' ? 'active' : ''}`} id="pg-oferta">
+          <div className="page-inner">
+            <div className="sec-head">
+              <span className="k">A oferta</span>
+              <h2>O que você recebe</h2>
+            </div>
+            <div className="offer">
+              <div className="price-row">
+                <span className="price">
+                  <span className="gold-grad">{PRICE}</span>
+                </span>
+                <span className="price-note">investimento do protótipo</span>
+              </div>
+              <ul>
+                <li>
+                  <span className="ic">✓</span> Protótipo visual navegável do seu app ou sistema — o
+                  front-end em alta fidelidade
+                </li>
+                <li>
+                  <span className="ic">✓</span> Mapeamento da jornada do usuário e arquitetura
+                  técnica
+                </li>
+                <li>
+                  <span className="ic">✓</span> Plano de trabalho e orçamento do desenvolvimento
+                  completo
+                </li>
+                <li>
+                  <span className="ic">✓</span> Pesquisa de mercado para validar a ideia antes de
+                  investir
+                </li>
+              </ul>
+              <p className="foot">
+                Depois do protótipo, você pode seguir com a Canis no{' '}
+                <b>desenvolvimento e implementação</b> — a mesma equipe do início ao fim.
+              </p>
+            </div>
+            <div className="proof">
+              <b>+50 empresas</b> já validaram seus apps e sistemas com os protótipos da Canis
+            </div>
+          </div>
+        </section>
+
+        {/* PÁGINA 2 · PIPELINE */}
+        <section className={`page ${current === 'pipe' ? 'active' : ''}`} id="pg-pipe">
+          <div className="page-inner">
+            <div className="sec-head">
+              <span className="k">Da ideia ao app no ar</span>
+              <h2>O caminho completo do seu projeto</h2>
+            </div>
+            <div className="pipe">
+              <div className="pipe-steps">
+                <div className="pipe-step">
+                  <span className="dot" />
+                  <div>
+                    <h3>
+                      <span className="n">Etapa 1 · Protótipo</span>Valide a ideia e o orçamento
+                    </h3>
+                    <p>Telas navegáveis + plano de trabalho com prazos e orçamento fechado.</p>
+                  </div>
+                </div>
+                <span className="pipe-link" aria-hidden="true" />
+                <div className="pipe-step">
+                  <span className="dot" />
+                  <div>
+                    <h3>
+                      <span className="n">Etapa 2 · Desenvolvimento</span>A equipe constrói o app ou
+                      sistema
+                    </h3>
+                    <p>Desenvolvimento completo com a mesma equipe que desenhou o protótipo.</p>
+                  </div>
+                </div>
+                <span className="pipe-link" aria-hidden="true" />
+                <div className="pipe-step">
+                  <span className="dot" />
+                  <div>
+                    <h3>
+                      <span className="n">Etapa 3 · Implementação</span>Publicamos e acompanhamos no
+                      ar
+                    </h3>
+                    <p>Deploy, configuração e suporte no lançamento.</p>
+                  </div>
+                </div>
+              </div>
+              <p className="tagline">
+                <b>Tudo com a mesma equipe.</b> Sem trocar de fornecedor no meio do caminho.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* PÁGINA 3 · COMO FUNCIONA */}
+        <section className={`page ${current === 'passos' ? 'active' : ''}`} id="pg-passos">
+          <div className="page-inner">
+            <div className="sec-head">
+              <span className="k">Como funciona</span>
+              <h2>Do formulário ao protótipo em 4 passos</h2>
+            </div>
+            <div className="steps">
+              <div className="step">
+                <span className="num">1</span>
+                <div>
+                  <h3>Você preenche o formulário</h3>
+                  <p>3 perguntas rápidas — leva 1 minuto.</p>
+                </div>
+              </div>
+              <div className="step">
+                <span className="num">2</span>
+                <div>
+                  <h3>Falamos no WhatsApp</h3>
+                  <p>Respondemos e tiramos suas dúvidas direto por lá.</p>
+                </div>
+              </div>
+              <div className="step">
+                <span className="num">3</span>
+                <div>
+                  <h3>Agendamos uma call</h3>
+                  <p>Para entender seu projeto a fundo.</p>
+                </div>
+              </div>
+              <div className="step">
+                <span className="num">4</span>
+                <div>
+                  <h3>Fechamos o protótipo</h3>
+                  <p>Telas navegáveis + plano de trabalho com prazos e orçamento do desenvolvimento completo.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* PÁGINA 4 · QUIZ TIPO */}
+        <section className={`page quiz ${current === 'q-tipo' ? 'active' : ''}`} id="pg-q1">
+          <div className="page-inner">
+            <span className="q-label">Pergunta 1 de 4</span>
+            <h2>Que tipo de projeto você quer desenvolver?</h2>
+            <p className="q-sub">Isso ajuda a Canis a montar o protótipo certo para você.</p>
+            <div className="opts">
+              {Object.entries(PROJECT_TYPE_LABELS).map(([id, label]) => (
+                <button
+                  key={id}
+                  className={`opt ${answers.tipo === id ? 'sel' : ''}`}
+                  onClick={() => handleSelect('tipo', id)}
+                >
+                  {label} <span className="arr">→</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* PÁGINA 5 · QUIZ STATUS */}
+        <section className={`page quiz ${current === 'q-status' ? 'active' : ''}`} id="pg-q2">
+          <div className="page-inner">
+            <span className="q-label">Pergunta 2 de 4</span>
+            <h2>Qual o status do seu projeto?</h2>
+            <p className="q-sub">Queremos entender onde você está hoje.</p>
+            <div className="opts">
+              {PROJECT_STATUS_OPTIONS.map((option) => (
+                <button
+                  key={option.id}
+                  className={`opt ${answers.status === option.id ? 'sel' : ''}`}
+                  onClick={() => handleSelect('status', option.id)}
+                >
+                  {option.label} <span className="arr">→</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* PÁGINA 6 · QUIZ ORÇAMENTO */}
+        <section className={`page quiz ${current === 'q-orc' ? 'active' : ''}`} id="pg-q3">
+          <div className="page-inner">
+            <span className="q-label">Pergunta 3 de 4</span>
+            <h2>Como você planeja investir?</h2>
+            <p className="q-sub">
+              O protótipo custa <b>{PRICE}</b>. Depois dele, você recebe o orçamento exato do
+              desenvolvimento completo.
+            </p>
+            <div className="opts">
+              {BUDGET_OPTIONS.map((option) => (
+                <button
+                  key={option.id}
+                  className={`opt ${answers.orc === option.id ? 'sel' : ''}`}
+                  onClick={() => handleSelect('orc', option.id)}
+                >
+                  {option.label} <span className="arr">→</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* PÁGINA 7 · QUIZ DADOS */}
+        <section className={`page quiz ${current === 'q-dados' ? 'active' : ''}`} id="pg-q4">
+          <div className="page-inner">
+            <span className="q-label">Pergunta 4 de 4</span>
+            <h2>Onde a gente te chama?</h2>
+            <p className="q-sub">Seus dados vão direto para o WhatsApp da Canis — resposta em até 24h.</p>
+            <form id="form" className="form-grid" onSubmit={submitLead} noValidate>
+              <div className="field">
+                <label htmlFor="nome">Nome completo</label>
+                <input
+                  id="nome"
+                  name="name"
+                  placeholder="Seu nome"
+                  required
+                  value={answers.name || ''}
+                  onChange={handleInputChange}
+                  onBlur={handleInputBlur}
+                  className={getInputClassName('name', answers.name)}
+                />
+                {touchedFields.name && !answers.name?.trim() && (
+                  <p className="validation-msg">Informe seu nome completo</p>
+                )}
+              </div>
+              <div className="field">
+                <label htmlFor="email">E-mail de trabalho</label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="voce@empresa.com"
+                  required
+                  value={answers.email || ''}
+                  onChange={handleInputChange}
+                  onBlur={handleInputBlur}
+                  className={getInputClassName('email', answers.email)}
+                />
+                {touchedFields.email && !answers.email?.trim() && (
+                  <p className="validation-msg">Informe seu e-mail</p>
+                )}
+              </div>
+              <div className="field wide">
+                <label htmlFor="whats">WhatsApp</label>
+                <input
+                  id="whats"
+                  name="whatsapp"
+                  type="tel"
+                  placeholder="(11) 99999-9999"
+                  required
+                  value={answers.whatsapp || ''}
+                  onChange={handleInputChange}
+                  onBlur={handleInputBlur}
+                  className={getInputClassName('whatsapp', answers.whatsapp)}
+                />
+                {touchedFields.whatsapp && !answers.whatsapp?.trim() && (
+                  <p className="validation-msg">Informe seu WhatsApp</p>
+                )}
+              </div>
+              <button type="submit" className="btn" disabled={isSubmitting}>
+                {isSubmitting ? 'Enviando...' : 'Fechar protótipo →'}
+              </button>
+            </form>
+          </div>
+        </section>
+
+        {/* PÁGINA 8 · SUCESSO */}
+        <section className={`page ${current === 'success' ? 'active' : ''}`} id="pg-success">
+          <div className="page-inner success">
+            <div className="check">✓</div>
+            <h2>Recebemos seus dados!</h2>
+            <p>Vamos te chamar no WhatsApp para agendar uma call e fechar seu protótipo.</p>
+            <a
+              className="wa"
+              href={generateWhatsAppLink()}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Falar no WhatsApp agora
+            </a>
+          </div>
+        </section>
       </main>
+
+      {/* BARRA INFERIOR */}
+      <div className="nav-wrap">
+        <div className={`nav-row ${isQuiz ? 'quiz-mode' : ''} ${locked ? 'locked' : ''}`}>
+          {!isFirst && !isSuccess && (
+            <button className="nav-btn back" onClick={() => !locked && goto(PAGES[idx - 1])}>
+              ← Voltar
+            </button>
+          )}
+          {!isSuccess && !isQuiz && (
+            <button
+              className="nav-btn next"
+              onClick={() => !locked && goto(PAGES[idx + 1])}
+            >
+              {nextLabel}
+            </button>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
